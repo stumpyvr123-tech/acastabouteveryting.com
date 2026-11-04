@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Something wrong</title>
+</head>
+
+<body>
+    <script>
+        const CACHE_NAME = 'noah-offline-v1';
+        const OFFLINE_URL = 'offline.html';
+
+        // 📥 1. Store the offline page in the local vault the first time the site loads
+        self.addEventListener('install', (event) => {
+            event.waitUntil(
+                caches.open(CACHE_NAME).then((cache) => {
+                    return cache.add(OFFLINE_URL);
+                })
+            );
+        });
+
+        // 🔄 2. Intercept connection crashes and serve the custom offline file instead
+        self.addEventListener('fetch', (event) => {
+            // Only check page requests, ignore background images/scripts
+            if (event.request.mode === 'navigate') {
+                event.respondWith(
+                    fetch(event.request).catch(() => {
+                        // If fetch fails (NO INTERNET), instantly load the offline page from the vault!
+                        return caches.open(CACHE_NAME).then((cache) => {
+                            return cache.match(OFFLINE_URL);
+                        });
+                    })
+                );
+            }
+        });
+    </script>
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background-image: url("asadal_stock_65.jpg");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            font-family: Titan One, sans-serif;
+            text-align: center;
+            color: #123047;
+        }
+
+        .btn {
+            margin: 10px;
+            padding: 15px 30px;
+            text-align: center;
+            text-transform: uppercase;
+            transition: 0.5s;
+            background-size: 200% auto;
+            background-image: linear-gradient(45deg, #2ff5ff 0%, #1de00b 51%, #e2e90d 100%);
+            color: #123047;
+            border-radius: 10px;
+            border: 0;
+            font-weight: 700;
+            display: inline-block;
+            box-shadow: 0 0 14px -7px #f09819;
+        }
+
+        .btn:hover {
+            background-position: right center;
+            color: #123047;
+            text-decoration: none;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+
+    </head>
+
+    <h1>Something here is not right...</h1>
+    <button onclick="window.reload()" class="btn">Retry</button>
+</body>
+
+</html>
